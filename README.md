@@ -117,7 +117,7 @@ Given a transaction occurs at `2014-04-29T13:15:54`, the past 24 hour sliding wi
 
 2. Transaction date time timezone & format.
 
-Assume that all the dates in the transaction record are in the same timezone. And date format is `ISO-8601` without the timezone and to the second precision. E.g
+Assume that all the dates in the transaction record are in the same timezone. And the date format is `ISO-8601` without the timezone and to the second in precision. E.g
 `yyyy-MM-ddTHH:mm::ss`.
 
 3. Credit card/Hash uniqueness
@@ -126,27 +126,31 @@ Although collision is possible in theory for hashing, for the scope of this prob
 
 ### Solution
 
-The program can be divided into two parts: reading from a file and processing raw data (with validation) of the .csv into a list of sanitized `Transaction` and then performing fraud scan on those transaction against the fraud detection rule. 
+The program can be divided into two parts: reading from a file and processing raw data (with validation) of the .csv into a list of sanitized `Transaction` and then performing a fraud scan on those transactions against the fraud detection rule. 
 
 In this case, the rule is that a credit card is identified as fraudulent if the sum amount of transactions from that credit card over a 24-hour sliding window period exceeds a given limit.
 
-The first part is taken care of by a `TransactionFileLoader` which is a simple io util class that utilises a `TransactionResolver` to "resolve" or "transform" transaction record text line into a Java POJO `Transaction`. The resolver expects the text line is in the formar `<hashed_credit_card>, <date-time in ISO-8601 no timezone>, <amount>`. If there is an invalid line, the loader simply ignores the line and processes with the next one.
+The first part is taken care of by a `TransactionFileLoader` which is a simple io util class that utilises a `TransactionResolver` to "resolve" or "transform" transaction record text line into a Java POJO `Transaction`. The resolver expects the text line is in the format
+```
+<hashed_credit_card>, <date-time in ISO-8601 no timezone>, <amount>
+```
+If there is an invalid line, the loader simply ignores the line and processes with the next one.
 
-The heart of the program is the `FraudDetector` which takes a list of transactions and performs a fraud scan. The `FraudDetector` scans each transaction (as it comes in chronological order) at a time. At each transaction `T`, it computes the total amount of the past transactions of that credit card and only within the last 24 hours from when `T` occurs. If the total amount exceeds the threshold, the `FraudDetector`  marks that credit card as fraudulent. Once all the transactions have been scanned, the `FraudDetector` returns a list of fraudulent credit cards.
+The heart of the program is the `FraudDetector` which takes a list of transactions and performs a fraud scan. The `FraudDetector` scans each transaction (as it comes in chronological order) at a time. At each transaction `T`, it computes the total amount of the past transactions of that credit card and only within the last 24 hours from when `T` occurs. If the total amount exceeds the threshold, the `FraudDetector`  marks that credit card as fraudulent. Once all the transactions are scanned, the `FraudDetector` returns a list of fraudulent credit cards if there is any.
 
 ### Limitation & Futher Improvment
 
 This session discusses some of the limitations of this solution. 
 
-The `FraudDetector` as the moment requires the `complete` data of all transactions. So, it is designed to work in `offline` mode where all the transactions are available with a small set of data. Often, the number of transactions in a production cannot be taken as a `List` into a method. Moreover, fraud detection is only useful if it's running in real time, meaning it should be able to detect fraud as the transaction data becomes available (in real time).
+The `FraudDetector` at the moment requires a `complete` data of all transactions. So, it is designed to work in `offline` mode where all the transactions are available with a small set of data. Often, the number of transactions in a production cannot be taken as a `List` into a method. Moreover, fraud detection is only useful if it's running in real time, meaning it should be able to detect fraud as the transaction data becomes available (in real time).
 
 All of the above limitations can be overcome with not a great deal of amendment from the current problem. To address the data size problem, since only the transactions of the last 24 hours is of concern, the `FraudDetector` can be updated to keep only transactions within the last 24 hours of the latest observed transaction for a given credit card, thus keeping the data in memory manageable.
-As for detecting fraud in real time, we can keep `TransactionFileLoader` and `FraudDetector` run synchronously, meaning the `loader` will feed the `detector` with latest `Transaction` as soon as it becomes available.
+As for detecting fraud in real time, we can keep `TransactionFileLoader` and `FraudDetector` run synchronously, meaning the `loader` will feed the `detector` with latest `Transaction` as soon as it becomes available. Hence, transaction is fraud scanned as it is read from source.
 
 ## Language and static code analysis
 
 1. Programm is written in Java(8) and Maven is used as the build system.
-2. Code is covered by unit tests and integration tests (96% code coverage).
+2. Only test coverage is considered for ensuring the static code quality (due to the nature of this exercise). Code is covered by unit tests and integration tests (96% code coverage).
 
 ## Testing & Sample
 
@@ -183,4 +187,3 @@ Return
 There are 1 fraudulent credit card(s):
 1f409e4283ad6375bf5d4e9372d
 ```
-
