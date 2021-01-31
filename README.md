@@ -8,7 +8,7 @@ This repository contains the following files/directories:
 1. `fraud-detection.sh`: Executable fraud detection app
 2. `pom.xml`: Maven build file
 3. `src/`: All java source/test code and resources for development and testing
-4. `executable`: Contains the `FraudDetectionApp.jar` that is used in the `fraud-detector.sh``
+4. `executable`: Contains the `FraudDetectionApp.jar` that is used in the `fraud-detector.sh`
 5. `README.md`: Program documentation.
 
 ## Build
@@ -40,7 +40,7 @@ cp target/FraudDetectionApp.jar executable/
 ./fraud-detection.sh <amount limit> <transaction file>
 ```
 
-If `bash` not available:
+If `bash` is not available:
 
 ```
 java -jar executable/FraudDetectionApp.jar <amount limit> <transaction file>
