@@ -172,7 +172,7 @@ f2f1ee2840d23ed1430cbec83c6, 2014-05-02T10:20:54, 8.00
 
 `Limit: 35.00`
 
-For this case, credit card `1f409e4283ad6375bf5d4e9372d` is a fraud as spend in total 40.00 over 2 consecutive days (2014-04-30, 2014-05-01) , but still within 24 hours. `10d7ce2f43e35fa57d1bbf8b1e2` spends over 35.00 if counting all transactions, but there is no 24 hour period, that it spends over that limit.
+For this case, credit card `1f409e4283ad6375bf5d4e9372d` is a fraud as it spends in total 40.00 over 2 consecutive days (2014-04-30, 2014-05-01) , but still within 24 hours. Credit card `10d7ce2f43e35fa57d1bbf8b1e2` spends over 35.00 if counting all transactions, but there is no 24 hour period that it spends over that limit.
 ```
 1f409e4283ad6375bf5d4e9372d, 2014-04-30T16:25:54, 10.00
 1f409e4283ad6375bf5d4e9372d, 2014-05-01T08:15:54, 30.00
